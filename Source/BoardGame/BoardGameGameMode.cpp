@@ -40,6 +40,8 @@ ABoardGameGameMode::ABoardGameGameMode()
 		ConstructorHelpers::FObjectFinderOptional<UStaticMesh>(TEXT("/Game/Meshes/spider_white_piece")).Get();
 	LoadedMeshes[TEXT("AntWhite")] =
 		ConstructorHelpers::FObjectFinderOptional<UStaticMesh>(TEXT("/Game/Meshes/ant_white_piece")).Get();
+	HighlightMaterial =
+		ConstructorHelpers::FObjectFinderOptional<UMaterial>(TEXT("/Game/Materials/M_Highlight")).Get();
 
 	// start the bgcore
 
@@ -63,6 +65,22 @@ void ABoardGameGameMode::BeginPlay()
 	}
 
 	// TODO: Start the game (differnt thread?)
+
+	CoreThread = FBgCoreThread::JoyInit(*this);
+	
+	GetWorldTimerManager().SetTimer(this, &ABoardGameGameMode::CheckBgCoreStatus, 1, true);
+}
+
+void ABoardGameGameMode::CheckBgCoreStatus()
+{
+	if (CoreThread && CoreThread->IsWaitingForChoise())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CORE IS DONE AND THERE ARE %d OPTIONS"), CoreThread->GetNumOfOptions());
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CORE IS NOT READY!"));
+	}
 }
 
 void ABoardGameGameMode::LoadPlayer(const shared_ptr<Player> &player)

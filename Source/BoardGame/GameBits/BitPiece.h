@@ -19,6 +19,10 @@ class BOARDGAME_API ABitPiece : public AActor
 	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* PieceMeshComponent;
 
+	/** Dummy root component */
+	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* PieceHighlightMeshComponent;
+
 	float Width;
 
 	weak_ptr<Piece> Data;
@@ -27,9 +31,13 @@ class BOARDGAME_API ABitPiece : public AActor
 	UFUNCTION()
 	void PieceClicked(UPrimitiveComponent* ClickedComp);
 
-	/** Handle the piece being clicked */
+	/** Handle the piece mouse over */
 	UFUNCTION()
-	void PieceMouseOver(UPrimitiveComponent* ClickedComp);
+		void PieceMouseOver(UPrimitiveComponent* ClickedComp);
+
+	/** Handle the piece mouse out */
+	UFUNCTION()
+		void PieceMouseOut(UPrimitiveComponent* ClickedComp);
 	
 public:	
 	// Sets default values for this actor's properties

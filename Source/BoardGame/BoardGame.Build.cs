@@ -17,7 +17,11 @@ public class BoardGame : ModuleRules
  
 	public BoardGame(TargetInfo Target)
 	{
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+        PrivateDependencyModuleNames.AddRange(new string[] { "Engine", "Core"
+        
+        });
+
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "RHI" });
 
         bUseRTTI = true;
         // Neccessary configuration to make the UEB work with boost exceptions

@@ -15,6 +15,9 @@ ABitPiece::ABitPiece()
 	// TODO: Add a block in game to know the position and the limits of the pieces set;
 	PieceMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BlockMesh0"));
 	PieceMeshComponent->AttachTo(DummyRoot);
+
+	PieceHighlightMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HighlightMesh"));
+	PieceHighlightMeshComponent->AttachTo(PieceMeshComponent);
 }
 
 // Called when the game starts or when spawned
@@ -29,6 +32,7 @@ void ABitPiece::AddPieceMesh(UStaticMesh *PieceMesh)
 
 	PieceMeshComponent->OnClicked.AddDynamic(this, &ABitPiece::PieceClicked);
 	PieceMeshComponent->OnBeginCursorOver.AddDynamic(this, &ABitPiece::PieceMouseOver);
+	PieceMeshComponent->OnEndCursorOver.AddDynamic(this, &ABitPiece::PieceMouseOut);
 
 	FVector orgin;
 	FVector boundsExtent;
@@ -36,7 +40,18 @@ void ABitPiece::AddPieceMesh(UStaticMesh *PieceMesh)
 
 	// Update Width whenever is added a mesh to the piece;
 	Width = boundsExtent.X * 2;
+
+	//Setting the highlight effect
+	PieceHighlightMeshComponent->SetStaticMesh(PieceMesh);
+
+	auto world = GetWorld();
+	auto gameMode = (ABoardGameGameMode*)world->GetAuthGameMode();
+	PieceHighlightMeshComponent->SetRenderCustomDepth(true);
+	PieceHighlightMeshComponent->SetMaterial(0, gameMode->HighlightMaterial);
+	PieceHighlightMeshComponent->SetVisibility(false); 
 }
+
+
 
 const float ABitPiece::GetWidth() const
 {
@@ -53,7 +68,14 @@ void ABitPiece::SetData(shared_ptr<Piece> data)
 	auto gameMode = (ABoardGameGameMode*)world->GetAuthGameMode();
 
 	FString meshKey = bitName + (collor == 0 ? TEXT("White") : TEXT("Black"));
-	AddPieceMesh(gameMode->LoadedMeshes[meshKey]);
+	UStaticMesh* mesh = gameMode->LoadedMeshes[meshKey];
+	uint32 materialsNum = mesh->Materials.Num();
+	if (materialsNum > 1)
+	{
+		mesh->Materials.RemoveAt(1, materialsNum - 2);
+	}
+	AddPieceMesh(mesh);
+	
 }
 
 void ABitPiece::PieceClicked(UPrimitiveComponent* ClickedComp)
@@ -69,5 +91,10 @@ void ABitPiece::PieceClicked(UPrimitiveComponent* ClickedComp)
 
 void ABitPiece::PieceMouseOver(UPrimitiveComponent* ClickedComp)
 {
+	PieceHighlightMeshComponent->SetVisibility(true);
+}
 
+void ABitPiece::PieceMouseOut(UPrimitiveComponent* ClickedComp)
+{
+	PieceHighlightMeshComponent->SetVisibility(false);
 }
