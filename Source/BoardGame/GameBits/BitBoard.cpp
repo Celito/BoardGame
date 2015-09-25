@@ -38,8 +38,9 @@ void ABitBoard::BeginPlay()
 	
 }
 
-void ABitBoard::SetData(const shared_ptr<Board> &data)
+void ABitBoard::SetData(const shared_ptr<GameBit> &data)
 {
+	Super::SetData(data);
 	auto children = data->get_children();
 	for (auto child : children)
 	{

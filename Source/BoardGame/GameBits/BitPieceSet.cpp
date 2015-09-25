@@ -34,12 +34,13 @@ ABitPieceSet::ABitPieceSet()
 // Called when the game starts or when spawned
 void ABitPieceSet::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 }
 
-void ABitPieceSet::SetData(shared_ptr<PieceSet> data)
+void ABitPieceSet::SetData(const shared_ptr<GameBit> &data)
 {
+	Super::SetData(data);
+
 	float betweenPieces = 5.f;
 	float totalPiecesWidth = 0;
 	uint16 pieceCount = 0;

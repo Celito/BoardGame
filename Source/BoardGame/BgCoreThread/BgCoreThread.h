@@ -7,6 +7,7 @@
 
 class AGameMode;
 class Action;
+class Option;
 
 using namespace std;
 
@@ -18,7 +19,7 @@ class BOARDGAME_API FBgCoreThread : public FRunnable, public GameController
 
 	AGameMode* TheGM;
 
-	uint32 NumOfOpts;
+	weak_ptr<Action> CurrAction;
 
 	bool WaitingForChoise;
 
@@ -57,7 +58,9 @@ public:
 
 	bool IsWaitingForChoise() { return WaitingForChoise; };
 
-	uint32 GetNumOfOptions() { return NumOfOpts; };
+	const vector<shared_ptr<Option>> & GetCurrOptions();
 
 	void ResolveAction(shared_ptr<Action> action);
+
+	void Choose(shared_ptr<Option> option);
 };

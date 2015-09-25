@@ -3,6 +3,7 @@
 #include <GameFramework/GameMode.h>
 #include <BgCore.h>
 #include <player/Player.h>
+#include "GameBits/VisualGameBit.h"
 #include "BgCoreThread/BgCoreThread.h"
 #include "BoardGameGameMode.generated.h"
 
@@ -22,6 +23,10 @@ class ABoardGameGameMode : public AGameMode
 
 	void CheckBgCoreStatus();
 
+	map<uint32, AVisualGameBit*> RegisteredBits;
+
+	bool CurrOptionsSetuped;
+
 public:
 	ABoardGameGameMode();
 
@@ -32,6 +37,12 @@ public:
 	UMaterial* HighlightMaterial;
 
 	BgCore core;
+
+	void RegisterVisualBit(AVisualGameBit* bit);
+
+	void ChooseOptionByBit(uint32 option_id);
+
+	void ChooseOption(shared_ptr<Option> opt);
 };
 
 

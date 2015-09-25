@@ -31,8 +31,7 @@ ABitTile::ABitTile()
 // Called when the game starts or when spawned
 void ABitTile::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 }
 
 void ABitTile::TileClicked(UPrimitiveComponent* ClickedComp)
@@ -44,9 +43,4 @@ void ABitTile::TileClicked(UPrimitiveComponent* ClickedComp)
 		FString bitName = dataPtr->get_bit_name().c_str();
 		UE_LOG(LogTemp, Warning, TEXT("CLICKED ON TILE: %s, UNIQUE ID: %d"), *bitName, bitUniqueId)
 	}
-}
-
-void ABitTile::SetData(const shared_ptr<Tile> &data)
-{
-	Data = data;
 }

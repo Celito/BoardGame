@@ -8,8 +8,11 @@
 #include "GameBits/BitPieceSet.h"
 #include "GameBits/BitPiece.h"
 #include "GameBits/BitBoard.h"
+#include <turns/actions/options/Option.h>
+#include <turns/actions/options/BitOption.h>
 #include "gameBits/GameBit.h"
 #include "gameBits/PieceSet.h"
+#include "gameBits/VisualGameBit.h"
 #include "gameBits/boards/Board.h"
 
 ABoardGameGameMode::ABoardGameGameMode()
@@ -67,19 +70,33 @@ void ABoardGameGameMode::BeginPlay()
 	// TODO: Start the game (differnt thread?)
 
 	CoreThread = FBgCoreThread::JoyInit(*this);
+
+	FTimerHandle MyHandle;
+
+	CurrOptionsSetuped = false;
 	
-	GetWorldTimerManager().SetTimer(this, &ABoardGameGameMode::CheckBgCoreStatus, 1, true);
+	GetWorldTimerManager().SetTimer(MyHandle, this, &ABoardGameGameMode::CheckBgCoreStatus, 1, true);
 }
 
 void ABoardGameGameMode::CheckBgCoreStatus()
 {
-	if (CoreThread && CoreThread->IsWaitingForChoise())
+	if (!CurrOptionsSetuped && CoreThread && CoreThread->IsWaitingForChoise())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CORE IS DONE AND THERE ARE %d OPTIONS"), CoreThread->GetNumOfOptions());
-	}
-	else 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CORE IS NOT READY!"));
+		auto opts = CoreThread->GetCurrOptions();
+		UE_LOG(LogTemp, Warning, TEXT("CORE IS DONE AND THERE ARE %d OPTIONS"), opts.size());
+		for (auto opt : opts)
+		{
+			if (auto bitOpt = dynamic_pointer_cast<BitOption>(opt))
+			{
+				auto bit = bitOpt->get_bit();
+				auto uniqueId = bit->get_unique_id();
+				if (RegisteredBits.find(uniqueId) != RegisteredBits.end())
+				{
+					RegisteredBits[uniqueId]->SetAsAnOption(true);
+				}
+			}
+		}
+		CurrOptionsSetuped = true;
 	}
 }
 
@@ -133,4 +150,42 @@ void ABoardGameGameMode::LoadBit(const shared_ptr<GameBit> &bitData)
 
 		boardVisual->SetData(boardDataPtr);
 	}
+}
+
+void ABoardGameGameMode::RegisterVisualBit(AVisualGameBit* bit)
+{
+	RegisteredBits[bit->GetUniqueDataId()] = bit;
+}
+
+void ABoardGameGameMode::ChooseOptionByBit(uint32 option_id)
+{
+	auto opts = CoreThread->GetCurrOptions();
+	for (auto opt : opts)
+	{
+		if (auto optBit = dynamic_pointer_cast<BitOption>(opt))
+		{
+			if (option_id == optBit->get_bit()->get_unique_id())
+			{
+				ChooseOption(opt);
+			}
+		}
+	}
+}
+
+void ABoardGameGameMode::ChooseOption(shared_ptr<Option> opt)
+{
+	auto opts = CoreThread->GetCurrOptions();
+	for (auto opt : opts)
+	{
+		if (auto optBit = dynamic_pointer_cast<BitOption>(opt))
+		{
+			auto uniqueId = optBit->get_bit()->get_unique_id();
+			if (RegisteredBits.find(uniqueId) != RegisteredBits.end())
+			{
+				RegisteredBits[uniqueId]->SetAsAnOption(false);
+			}
+		}
+	}
+	CoreThread->Choose(opt);
+	CurrOptionsSetuped = false;
 }

@@ -18,6 +18,8 @@ ABitPiece::ABitPiece()
 
 	PieceHighlightMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HighlightMesh"));
 	PieceHighlightMeshComponent->AttachTo(PieceMeshComponent);
+
+	//UPostProcessComponent* postProcessComp;
 }
 
 // Called when the game starts or when spawned
@@ -49,6 +51,7 @@ void ABitPiece::AddPieceMesh(UStaticMesh *PieceMesh)
 	PieceHighlightMeshComponent->SetRenderCustomDepth(true);
 	PieceHighlightMeshComponent->SetMaterial(0, gameMode->HighlightMaterial);
 	PieceHighlightMeshComponent->SetVisibility(false); 
+	
 }
 
 
@@ -58,9 +61,10 @@ const float ABitPiece::GetWidth() const
 	return Width;
 }
 
-void ABitPiece::SetData(shared_ptr<Piece> data)
+void ABitPiece::SetData(const shared_ptr<GameBit> &data)
 {
-	Data = data;
+	Super::SetData(data);
+
 	FString bitName = data->get_bit_name().c_str();
 	uint32 collor = data->get_attr("Color").get_value();
 
@@ -75,26 +79,35 @@ void ABitPiece::SetData(shared_ptr<Piece> data)
 		mesh->Materials.RemoveAt(1, materialsNum - 2);
 	}
 	AddPieceMesh(mesh);
-	
 }
 
 void ABitPiece::PieceClicked(UPrimitiveComponent* ClickedComp)
 {
-	if (!Data.expired())
+	auto gameMode = GetWorld()->GetAuthGameMode();
+	auto boardGameMode = dynamic_cast<ABoardGameGameMode*>(gameMode);
+	
+	if (boardGameMode != nullptr && !Data.expired() && IsAnOption)
 	{
 		auto dataPtr = Data.lock();
 		auto bitUniqueId = dataPtr->get_unique_id();
 		FString bitName = dataPtr->get_bit_name().c_str();
-		UE_LOG(LogTemp, Warning, TEXT("CLICKED ON PIECE: %s, UNIQUE ID: %d"), *bitName, bitUniqueId)
+		UE_LOG(LogTemp, Warning, TEXT("SELECTED PIECE: %s, UNIQUE ID: %d"), *bitName, bitUniqueId);
+		boardGameMode->ChooseOptionByBit(bitUniqueId);
 	}
 }
 
 void ABitPiece::PieceMouseOver(UPrimitiveComponent* ClickedComp)
 {
-	PieceHighlightMeshComponent->SetVisibility(true);
+
 }
 
 void ABitPiece::PieceMouseOut(UPrimitiveComponent* ClickedComp)
 {
-	PieceHighlightMeshComponent->SetVisibility(false);
+
+}
+
+void ABitPiece::SetAsAnOption(bool isAnOption)
+{
+	Super::SetAsAnOption(isAnOption);
+	PieceHighlightMeshComponent->SetVisibility(isAnOption);
 }

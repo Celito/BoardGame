@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
+#include "VisualGameBit.h"
 #include "gameBits/PieceSet.h"
 #include "BitPieceSet.generated.h"
 
 UCLASS()
-class BOARDGAME_API ABitPieceSet : public AActor
+class BOARDGAME_API ABitPieceSet : public AVisualGameBit
 {
 	GENERATED_BODY()
 
@@ -22,6 +22,5 @@ public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void SetData(shared_ptr<PieceSet> data);
-	
+	virtual void SetData(const shared_ptr<GameBit> &data) override;
 };

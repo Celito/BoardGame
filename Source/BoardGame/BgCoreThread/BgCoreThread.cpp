@@ -38,7 +38,6 @@ FBgCoreThread::~FBgCoreThread()
 bool FBgCoreThread::Init()
 {
 	//Init the Data 
-	NumOfOpts = 0;
 
 	return true;
 }
@@ -132,8 +131,8 @@ bool FBgCoreThread::IsThreadFinished()
 
 void FBgCoreThread::ResolveAction(shared_ptr<Action> action)
 {
+	CurrAction = action;
 	auto options = action->get_options();
-	NumOfOpts = options.size();
 	WaitingForChoise = true;
 	while (WaitingForChoise)
 	{
@@ -144,4 +143,15 @@ void FBgCoreThread::ResolveAction(shared_ptr<Action> action)
 shared_ptr<PlayerController> FBgCoreThread::get_player_controller(uint32_t player_id)
 {
 	return PlayerControllers[player_id];
+}
+
+const vector<shared_ptr<Option>> & FBgCoreThread::GetCurrOptions()
+{ 
+	return CurrAction.lock()->get_options(); 
+}
+
+void FBgCoreThread::Choose(shared_ptr<Option> option)
+{
+	CurrAction.lock()->choose(option);
+	WaitingForChoise = false;
 }
